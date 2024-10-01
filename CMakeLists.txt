@@ -17,3 +17,4 @@ include(cmake/third_party.cmake)
 enable_testing()
 
 add_subdirectory(lib)
+add_subdirectory(examples)
