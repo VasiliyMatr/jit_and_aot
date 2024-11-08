@@ -1,7 +1,11 @@
 #ifndef INSTR_HPP
 #define INSTR_HPP
 
+#include <algorithm>
+#include <array>
+#include <optional>
 #include <unordered_map>
+#include <vector>
 
 #include <jit_aot/ir/values.hpp>
 
@@ -11,75 +15,178 @@ class BasicBlock;
 
 namespace instr {
 
-using fmt_it = fmt::format_context::iterator;
+enum class InstrType {
+    kIntBinArithAdd,
+    kIntBinArithSub,
+    kIntBinArithMul,
+    kIntBinArithDiv,
 
-struct InterfaceInstr {
-    virtual ~InterfaceInstr() = default;
-    virtual fmt_it format(fmt_it out) = 0;
+    kIntBinCmpLl,
+    kIntBinCmpGg,
+    kIntBinCmpEq,
+
+    kIntPhiNode,
+
+    kBrDirectUncond,
+    kBrDirectCond,
+
+    kReturn,
+
+    kInvalid,
 };
 
-enum class BinaryInstrType {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    CmpEq,
-    CmpLl,
-    CmpGg,
-};
+inline constexpr bool isIntBin(InstrType instr_type) {
+    switch (instr_type) {
+    case InstrType::kIntBinArithAdd:
+    case InstrType::kIntBinArithSub:
+    case InstrType::kIntBinArithMul:
+    case InstrType::kIntBinArithDiv:
+    case InstrType::kIntBinCmpLl:
+    case InstrType::kIntBinCmpGg:
+    case InstrType::kIntBinCmpEq:
+        return true;
 
-struct IntBinaryInstr final : public InterfaceInstr {
-    BinaryInstrType type;
+    default:
+        return false;
+    }
+}
 
-    IntValue op1{};
-    IntValue op2{};
-    IntProduct prod{};
+inline constexpr bool isPhiNode(InstrType instr_type) {
+    return instr_type == InstrType::kIntPhiNode;
+}
 
-    IntBinaryInstr(BinaryInstrType type, IntValue op1, IntValue op2,
-                   IntType prod_type, size_t prod_id)
-        : type(type), op1(op1), op2(op2), prod{prod_type, this, prod_id} {}
+inline constexpr bool isBranch(InstrType instr_type) {
+    switch (instr_type) {
+    case InstrType::kBrDirectUncond:
+    case InstrType::kBrDirectCond:
+    case InstrType::kReturn:
+        return true;
+    default:
+        return false;
+    }
+}
 
-    fmt_it format(fmt_it out) override;
-};
+// Base class for all instructions
+class Instr {
+  protected:
+    InstrType m_type = InstrType::kInvalid;
+    std::vector<const Value *> m_ops{};
+    std::vector<Instr *> m_users{};
 
-struct IntPhiNode final : public InterfaceInstr {
-    std::unordered_map<BasicBlock *, IntValue> map{};
-    IntProduct prod{};
-
-    IntPhiNode(IntType type, size_t prod_id) : prod{type, this, prod_id} {}
-
-    void addToMap(std::pair<BasicBlock *, IntValue> to_add) {
-        map.insert(to_add);
+  public:
+    Instr(InstrType type, std::vector<const Value *> ops)
+        : m_type{type}, m_ops(std::move(ops)) {
+        addThisAsUser();
     }
 
-    fmt_it format(fmt_it out) override;
+    virtual ~Instr() = default;
+
+    // Get instr type
+    JA_NODISCARD auto type() const noexcept { return m_type; }
+
+    JA_NODISCARD auto opBegin() noexcept { return m_ops.begin(); }
+    JA_NODISCARD auto opEnd() noexcept { return m_ops.end(); }
+    JA_NODISCARD auto opBegin() const noexcept { return m_ops.begin(); }
+    JA_NODISCARD auto opEnd() const noexcept { return m_ops.end(); }
+
+    // Get instr result ptr (== nullptr if instr don't have result)
+    JA_NODISCARD virtual const Value *result() const noexcept {
+        return nullptr;
+    }
+
+    // Get instr users begin
+    JA_NODISCARD auto usersBegin() noexcept { return m_users.begin(); }
+    // Get instr users end
+    JA_NODISCARD auto usersEnd() noexcept { return m_users.end(); }
+
+    // Add instr user
+    void addUser(Instr *user) {
+        JA_ENSHURE(result() &&
+                   "Can not add user for instruction without result");
+        m_users.push_back(user);
+    }
+
+    // Remove given user. Does nothing if such user isn't present.
+    // Return true if user was removed and false otherwise
+    bool removeUser(Instr *user) { return std::erase(m_users, user); }
+
+    // Format instr to `out` and return new iterator
+    JA_NODISCARD virtual fmt_it format(fmt_it out) const;
+
+  private:
+    // Add this as user for all operands producers
+    void addThisAsUser() {
+        for (const auto &op : m_ops) {
+            if (auto *prod = op->producer()) {
+                prod->addUser(this);
+            }
+        }
+    }
 };
 
-struct DirectUncondBranch final : public InterfaceInstr {
+// Base class for instructions with int result
+class IntResInstr : public Instr {
+    IntValue m_result;
+
+  public:
+    IntResInstr(InstrType type, std::vector<const Value *> ops,
+                IntType res_type, ValueId res_id)
+        : Instr(type, std::move(ops)), m_result{res_type, res_id, this} {}
+
+    JA_NODISCARD const IntValue *result() const noexcept override {
+        return &m_result;
+    }
+};
+
+// Instruction that operates on two ints and produces int
+class IntBinArith final : public IntResInstr {
+  public:
+    IntBinArith(InstrType type, const Value *op1, const Value *op2,
+                IntType res_type, ValueId res_id)
+        : IntResInstr(type, {op1, op2}, res_type, res_id) {}
+};
+
+class IntPhiNode final : public IntResInstr {
+    std::unordered_map<BasicBlock *, const Value *> m_map{};
+
+  public:
+    IntPhiNode(IntType res_type, ValueId res_id)
+        : IntResInstr(InstrType::kIntPhiNode, {}, res_type, res_id) {}
+
+    void addMapping(BasicBlock *bb, const Value *value) {
+        m_ops.push_back(value);
+        JA_ENSHURE(m_map.try_emplace(bb, value).second &&
+                   "Duplicated BasicBlock ptr in IntPhiNode");
+    }
+
+    JA_NODISCARD const auto &getMap() const noexcept { return m_map; }
+
+    JA_NODISCARD fmt_it format(fmt_it out) const override;
+};
+
+struct BrDirectUncond final : public Instr {
     BasicBlock *dest = nullptr;
 
-    DirectUncondBranch(BasicBlock *dest) : dest(dest) {}
+    BrDirectUncond(BasicBlock *dest)
+        : Instr(InstrType::kBrDirectUncond, {}), dest(dest) {}
 
-    fmt_it format(fmt_it out) override;
+    JA_NODISCARD fmt_it format(fmt_it out) const override;
 };
 
-struct DirectCondBranch final : public InterfaceInstr {
+struct BrDirectCond final : public Instr {
     BasicBlock *dest = nullptr;
     BasicBlock *fallthrough = nullptr;
-    IntValue cond{};
 
-    DirectCondBranch(BasicBlock *dest, BasicBlock *fallthrough, IntValue cond)
-        : dest(dest), fallthrough(fallthrough), cond(cond) {}
+    BrDirectCond(BasicBlock *dest, BasicBlock *fallthrough,
+                 const IntValue *cond)
+        : Instr(InstrType::kBrDirectCond, {cond}), dest(dest),
+          fallthrough(fallthrough) {}
 
-    fmt_it format(fmt_it out) override;
+    JA_NODISCARD fmt_it format(fmt_it out) const override;
 };
 
-struct Return final : public InterfaceInstr {
-    IntValue value{};
-
-    Return(IntValue value) : value(value) {}
-
-    fmt_it format(fmt_it out) override;
+struct Return final : public Instr {
+    Return(const IntValue *ret_val) : Instr(InstrType::kReturn, {ret_val}) {}
 };
 
 } // namespace instr

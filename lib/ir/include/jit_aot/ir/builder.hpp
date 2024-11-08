@@ -15,14 +15,11 @@ class Builder final {
     void setFunc(Function *func) { m_curr_func = func; }
 
     auto *newBb(std::string name, bool entry = false) {
-        auto new_bb =
-            std::make_unique<BasicBlock>(m_curr_func, std::move(name));
-        auto *out = new_bb.get();
-        m_curr_func->addBb(std::move(new_bb), entry);
+        auto *new_bb = m_curr_func->addBb(name, entry);
 
-        m_curr_bb = out;
-        m_curr_bb_pos = out->end();
-        return out;
+        m_curr_bb = new_bb;
+        m_curr_bb_pos = m_curr_bb->end();
+        return new_bb;
     }
 
     auto *newBb() { return newBb(std::to_string(m_curr_func->nextId())); }
@@ -36,49 +33,51 @@ class Builder final {
         return IntConstant{type, value};
     }
 
-    auto makeBinaryInstr(instr::BinaryInstrType type, IntValue op1,
-                         IntValue op2, size_t res_id) {
-        auto t1 = getIntValueType(op1);
-        auto t2 = getIntValueType(op2);
+    const auto *makeIntBin(instr::InstrType type, const IntValue *op1,
+                           const IntValue *op2, size_t res_id) {
+        JA_ENSHURE(instr::isIntBin(type));
 
-        JA_ENSHURE(t1.size == t2.size);
+        const auto &t1 = op1->type();
+        const auto &t2 = op2->type();
+
+        JA_ENSHURE(t1 == t2);
 
         auto instr =
-            std::make_unique<instr::IntBinaryInstr>(type, op1, op2, t1, res_id);
+            std::make_unique<instr::IntBinArith>(type, op1, op2, t1, res_id);
 
-        auto val = instr->prod;
+        const auto *val = instr->result();
         m_curr_bb->insert(std::move(instr), m_curr_bb_pos);
         return val;
     }
 
-    auto makeBinaryInstr(instr::BinaryInstrType type, IntValue op1,
-                         IntValue op2) {
-        return makeBinaryInstr(type, op1, op2, m_curr_func->nextId());
+    const auto *makeIntBin(instr::InstrType type, const IntValue *op1,
+                           const IntValue *op2) {
+        return makeIntBin(type, op1, op2, m_curr_func->nextId());
     }
 
-    auto makeAdd(IntValue op1, IntValue op2) {
-        return makeBinaryInstr(instr::BinaryInstrType::Add, op1, op2);
+    const auto *makeAdd(const IntValue *op1, const IntValue *op2) {
+        return makeIntBin(instr::InstrType::kIntBinArithAdd, op1, op2);
     }
-    auto makeSub(IntValue op1, IntValue op2) {
-        return makeBinaryInstr(instr::BinaryInstrType::Sub, op1, op2);
+    const auto *makeSub(const IntValue *op1, const IntValue *op2) {
+        return makeIntBin(instr::InstrType::kIntBinArithSub, op1, op2);
     }
-    auto makeMul(IntValue op1, IntValue op2) {
-        return makeBinaryInstr(instr::BinaryInstrType::Mul, op1, op2);
+    const auto *makeMul(const IntValue *op1, const IntValue *op2) {
+        return makeIntBin(instr::InstrType::kIntBinArithMul, op1, op2);
     }
-    auto makeDiv(IntValue op1, IntValue op2) {
-        return makeBinaryInstr(instr::BinaryInstrType::Div, op1, op2);
+    const auto *makeDiv(const IntValue *op1, const IntValue *op2) {
+        return makeIntBin(instr::InstrType::kIntBinArithDiv, op1, op2);
     }
-    auto makeCmpEq(IntValue op1, IntValue op2) {
-        return makeBinaryInstr(instr::BinaryInstrType::CmpEq, op1, op2);
+    const auto *makeCmpEq(const IntValue *op1, const IntValue *op2) {
+        return makeIntBin(instr::InstrType::kIntBinCmpEq, op1, op2);
     }
-    auto makeCmpLl(IntValue op1, IntValue op2) {
-        return makeBinaryInstr(instr::BinaryInstrType::CmpLl, op1, op2);
+    const auto *makeCmpLl(const IntValue *op1, const IntValue *op2) {
+        return makeIntBin(instr::InstrType::kIntBinCmpLl, op1, op2);
     }
-    auto makeCmpGg(IntValue op1, IntValue op2) {
-        return makeBinaryInstr(instr::BinaryInstrType::CmpGg, op1, op2);
+    const auto *makeCmpGg(const IntValue *op1, const IntValue *op2) {
+        return makeIntBin(instr::InstrType::kIntBinCmpGg, op1, op2);
     }
 
-    auto makePhiNode(IntType type) {
+    auto *makePhiNode(IntType type) {
         auto instr =
             std::make_unique<instr::IntPhiNode>(type, m_curr_func->nextId());
 
@@ -88,20 +87,20 @@ class Builder final {
     }
 
     void makeDirectUncondBranch(BasicBlock *dest) {
-        auto instr = std::make_unique<instr::DirectUncondBranch>(dest);
-        m_curr_bb->insert(std::move(instr), m_curr_bb_pos);
+        auto instr = std::make_unique<instr::BrDirectUncond>(dest);
+        m_curr_bb->insertBranch(std::move(instr));
     }
 
     void makeDirectCondBranch(BasicBlock *dest, BasicBlock *fallthrough,
-                              IntValue cond) {
+                              const IntValue *cond) {
         auto instr =
-            std::make_unique<instr::DirectCondBranch>(dest, fallthrough, cond);
-        m_curr_bb->insert(std::move(instr), m_curr_bb_pos);
+            std::make_unique<instr::BrDirectCond>(dest, fallthrough, cond);
+        m_curr_bb->insertBranch(std::move(instr));
     }
 
-    void makeReturn(IntValue value) {
+    void makeReturn(const IntValue *value) {
         auto instr = std::make_unique<instr::Return>(value);
-        m_curr_bb->insert(std::move(instr), m_curr_bb_pos);
+        m_curr_bb->insertBranch(std::move(instr));
     }
 };
 
