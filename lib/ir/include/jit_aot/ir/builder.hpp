@@ -6,6 +6,8 @@
 namespace jit_aot::ir {
 
 class Builder final {
+    std::list<IntConstant> m_consts{};
+
     Function *m_curr_func = nullptr;
     BasicBlock *m_curr_bb = nullptr;
     BasicBlock::Instrs::iterator m_curr_bb_pos{};
@@ -29,8 +31,13 @@ class Builder final {
         m_curr_bb_pos = bb_pos;
     }
 
-    auto makeIntConst(IntType type, uint64_t value) {
-        return IntConstant{type, value};
+    void setPos(BasicBlock *bb) {
+        m_curr_bb = bb;
+        m_curr_bb_pos = m_curr_bb->end();
+    }
+
+    const auto *makeIntConst(IntType type, uint64_t value) {
+        return &m_consts.emplace_back(type, value);
     }
 
     const auto *makeIntBin(instr::InstrType type, const IntValue *op1,

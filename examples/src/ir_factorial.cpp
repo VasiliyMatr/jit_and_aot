@@ -16,9 +16,9 @@ int main() {
 
     auto v0 = fact_func.nthArg(0);
 
-    auto const_zero = builder.makeIntConst(i32, 0);
-    auto const_one = builder.makeIntConst(i32, 1);
-    auto const_two = builder.makeIntConst(i32, 2);
+    const auto *const_zero = builder.makeIntConst(i32, 0);
+    const auto *const_one = builder.makeIntConst(i32, 1);
+    const auto *const_two = builder.makeIntConst(i32, 2);
 
     auto bb_init = builder.newBb("init", true);
     auto bb_cond = builder.newBb("cond");
@@ -28,8 +28,8 @@ int main() {
     // Build init bb
     builder.setPos(bb_init, bb_init->end());
 
-    auto v1 = builder.makeAdd(&const_zero, &const_two);
-    auto v2 = builder.makeAdd(&const_zero, &const_one);
+    auto v1 = builder.makeAdd(const_zero, const_two);
+    auto v2 = builder.makeAdd(const_zero, const_one);
     builder.makeDirectUncondBranch(bb_cond);
 
     // Build cond bb
@@ -50,7 +50,7 @@ int main() {
     builder.setPos(bb_loop, bb_loop->end());
 
     auto v6 = builder.makeMul(v3, v4);
-    auto v7 = builder.makeAdd(v1, &const_one);
+    auto v7 = builder.makeAdd(v1, const_one);
 
     phi1->addMapping(bb_loop, v7);
     phi2->addMapping(bb_loop, v6);
