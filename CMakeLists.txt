@@ -18,3 +18,4 @@ enable_testing()
 
 add_subdirectory(lib)
 add_subdirectory(examples)
+add_subdirectory(testing)
