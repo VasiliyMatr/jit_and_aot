@@ -11,7 +11,7 @@ template <>
 struct fmt::formatter<jit_aot::ir::InterfaceValueType>
     : public jit_aot::IFmtNoParseFormatter {
     auto format(const jit_aot::ir::InterfaceValueType &value_type,
-                fmt::format_context &ctx) const {
+                format_context &ctx) const {
         return value_type.format(ctx.out());
     }
 };
@@ -20,7 +20,7 @@ template <>
 struct fmt::formatter<jit_aot::ir::IntType>
     : public jit_aot::IFmtNoParseFormatter {
     auto format(const jit_aot::ir::IntType &int_type,
-                fmt::format_context &ctx) const {
+                format_context &ctx) const {
         return int_type.format(ctx.out());
     }
 };
@@ -30,8 +30,7 @@ struct fmt::formatter<jit_aot::ir::IntType>
 template <>
 struct fmt::formatter<jit_aot::ir::Value>
     : public jit_aot::IFmtNoParseFormatter {
-    auto format(const jit_aot::ir::Value &value,
-                fmt::format_context &ctx) const {
+    auto format(const jit_aot::ir::Value &value, format_context &ctx) const {
         return value.format(ctx.out());
     }
 };
@@ -39,8 +38,7 @@ struct fmt::formatter<jit_aot::ir::Value>
 template <>
 struct fmt::formatter<jit_aot::ir::IntValue>
     : public jit_aot::IFmtNoParseFormatter {
-    auto format(const jit_aot::ir::IntValue &value,
-                fmt::format_context &ctx) const {
+    auto format(const jit_aot::ir::IntValue &value, format_context &ctx) const {
         return value.format(ctx.out());
     }
 };
@@ -48,8 +46,7 @@ struct fmt::formatter<jit_aot::ir::IntValue>
 template <>
 struct fmt::formatter<jit_aot::ir::IntFuncArg>
     : public jit_aot::IFmtNoParseFormatter {
-    auto format(const jit_aot::ir::IntFuncArg &arg,
-                fmt::format_context &ctx) const {
+    auto format(const jit_aot::ir::IntFuncArg &arg, format_context &ctx) const {
         return arg.format(ctx.out());
     }
 };
@@ -60,7 +57,7 @@ template <>
 struct fmt::formatter<jit_aot::ir::instr::InstrType>
     : public fmt::formatter<string_view> {
     auto format(const jit_aot::ir::instr::InstrType &type,
-                fmt::format_context &ctx) const {
+                format_context &ctx) const {
         string_view name = "";
 
         switch (type) {
@@ -111,7 +108,7 @@ template <>
 struct fmt::formatter<jit_aot::ir::instr::Instr>
     : public jit_aot::IFmtNoParseFormatter {
     auto format(const jit_aot::ir::instr::Instr &instr,
-                fmt::format_context &ctx) const {
+                format_context &ctx) const {
         return instr.format(ctx.out());
     }
 };
@@ -156,15 +153,61 @@ JA_NODISCARD inline fmt_it instr::BrDirectCond::format(fmt_it out) const {
                           dest->name(), fallthrough->name());
 }
 
-} // namespace jit_aot::ir
-
 /// Other formatters
+
+template <class T> struct IrFormatter {
+    enum class FormatMode {
+        kDefault,
+        kDot,
+        kInvalid,
+    };
+
+    FormatMode fmt_mode = FormatMode::kDefault;
+
+    constexpr auto parse(fmt::format_parse_context &ctx) {
+        auto it = ctx.begin();
+        if (it == nullptr || *it == '}') {
+            fmt_mode = FormatMode::kDefault;
+            return it;
+        }
+
+        bool is_dot =
+            *(it++) == 'd' && *(it++) == 'o' && *(it++) == 't' && *(it) == '}';
+
+        if (is_dot) {
+            fmt_mode = FormatMode::kDot;
+            return it;
+        }
+
+        return ctx.begin();
+    }
+
+    virtual fmt_it format_default(const T &, fmt::format_context &) const = 0;
+    virtual fmt_it format_dot(const T &, fmt::format_context &) const = 0;
+
+    auto format(const T &bb, fmt::format_context &ctx) const {
+        switch (fmt_mode) {
+        case FormatMode::kDefault:
+            return format_default(bb, ctx);
+
+        case FormatMode::kDot:
+            return format_dot(bb, ctx);
+
+        default:
+            JA_ENSHURE(0);
+        }
+    }
+};
+
+} // namespace jit_aot::ir
 
 template <>
 struct fmt::formatter<jit_aot::ir::BasicBlock>
-    : public jit_aot::IFmtNoParseFormatter {
-    auto format(const jit_aot::ir::BasicBlock &bb,
-                fmt::format_context &ctx) const {
+    : public jit_aot::ir::IrFormatter<jit_aot::ir::BasicBlock> {
+
+    format_context::iterator
+    format_default(const jit_aot::ir::BasicBlock &bb,
+                   format_context &ctx) const override {
         auto out = fmt::format_to(ctx.out(), "{}:\n", bb.name());
 
         for (auto &&instr : bb) {
@@ -173,13 +216,31 @@ struct fmt::formatter<jit_aot::ir::BasicBlock>
 
         return out;
     }
+
+    format_context::iterator format_dot(const jit_aot::ir::BasicBlock &bb,
+                                        format_context &ctx) const override {
+        const void *bb_ptr = &bb;
+
+        auto out = fmt::format_to(ctx.out(), "bb_{} [label = \"{}\"]\n", bb_ptr,
+                                  bb.name());
+
+        for (auto succ_it = bb.succBegin(), succ_end = bb.succEnd();
+             succ_it != succ_end; ++succ_it) {
+
+            const void *succ_ptr = *succ_it;
+            out = fmt::format_to(out, "bb_{} -> bb_{}\n", bb_ptr, succ_ptr);
+        }
+
+        return out;
+    }
 };
 
 template <>
 struct fmt::formatter<jit_aot::ir::Function>
-    : public jit_aot::IFmtNoParseFormatter {
-    auto format(const jit_aot::ir::Function &func,
-                fmt::format_context &ctx) const {
+    : public jit_aot::ir::IrFormatter<jit_aot::ir::Function> {
+    fmt::format_context::iterator
+    format_default(const jit_aot::ir::Function &func,
+                   fmt::format_context &ctx) const override {
         auto out =
             fmt::format_to(ctx.out(), "{} {} (", func.retType(), func.name());
 
@@ -196,6 +257,21 @@ struct fmt::formatter<jit_aot::ir::Function>
             out = fmt::format_to(out, "{}{}\n",
                                  &bb == func.entry() ? "[entry] " : "", bb);
         }
+
+        return out;
+    }
+
+    fmt::format_context::iterator
+    format_dot(const jit_aot::ir::Function &func,
+               fmt::format_context &ctx) const override {
+        auto out = fmt::format_to(ctx.out(), "digraph CFG {{\n");
+        out = fmt::format_to(out, "node [shape = rectangle]\n\n");
+
+        for (const auto &bb : func) {
+            out = fmt::format_to(out, "{:dot}", bb);
+        }
+
+        out = fmt::format_to(out, "\n}}\n");
 
         return out;
     }

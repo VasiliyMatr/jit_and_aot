@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <jit_aot/ir/builder.hpp>
 #include <jit_aot/ir/formatting.hpp>
 
@@ -60,7 +62,15 @@ int main() {
 
     builder.makeReturn(v4);
 
-    fmt::println("{}", fact_func);
+    {
+        std::ofstream ir_txt{"ir.txt"};
+        ir_txt << fmt::format("{}\n", fact_func);
+    }
+
+    {
+        std::ofstream ir_dot{"ir.dot"};
+        ir_dot << fmt::format("{:dot}\n", fact_func);
+    }
 
     return 0;
 }
