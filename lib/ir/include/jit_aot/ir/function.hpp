@@ -56,6 +56,17 @@ class Function final {
     JA_NODISCARD auto begin() const noexcept { return m_bbs.cbegin(); }
     JA_NODISCARD auto end() const noexcept { return m_bbs.cend(); }
 
+    JA_NODISCARD auto *getBb(std::string_view bb_name) {
+        auto it =
+            std::find_if(begin(), end(), [bb_name](BasicBlock &bb) -> bool {
+                return bb.name() == bb_name;
+            });
+
+        return it != end() ? &*it : nullptr;
+    }
+
+    JA_NODISCARD auto getBbNum() const noexcept { return m_bbs.size(); }
+
     JA_NODISCARD auto *addBb(std::string bb_name, bool entry = false) {
         auto *new_bb = &m_bbs.emplace_back(this, std::move(bb_name));
 
