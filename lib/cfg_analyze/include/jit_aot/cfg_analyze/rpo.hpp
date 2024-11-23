@@ -3,11 +3,11 @@
 
 #include <jit_aot/ir/basic_block.hpp>
 
+#include "common_flags.hpp"
+
 namespace jit_aot::cfg {
 
 namespace _rpo_detail {
-
-constexpr uint64_t kMarker = 1ull << 63;
 
 // Do RPO algorithm. Flags should be cleared before this function call.
 // Sets bbs flags, so those should be reset
@@ -15,10 +15,10 @@ void getRpoOrderHelper(ir::BasicBlock *root, std::vector<ir::BasicBlock *> &out,
                        int &bb_count) {
     JA_ENSHURE(root != nullptr);
 
-    root->setFlags(kMarker);
+    root->setFlags(flags::kMarker1);
 
     for (auto it = root->succBegin(), end = root->succEnd(); it != end; ++it) {
-        if (!(*it)->testFlags(kMarker)) {
+        if (!(*it)->testFlags(flags::kMarker1)) {
             getRpoOrderHelper(*it, out, bb_count);
         }
     }

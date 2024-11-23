@@ -19,10 +19,10 @@ void getDfsOrderHelper(ir::BasicBlock *root,
         return;
     }
 
-    root->addFlags(flags::kMarker);
+    root->addFlags(flags::kMarker1);
     out.push_back(root);
     for (auto it = root->succBegin(), end = root->succEnd(); it != end; ++it) {
-        if (!(*it)->testFlags(flags::kMarker)) {
+        if (!(*it)->testFlags(flags::kMarker1)) {
             getDfsOrderHelper(*it, out);
         }
     }

@@ -44,10 +44,8 @@ DomMap getDomMap(ir::BasicBlock *root) {
 // [bb -> imm dominator]
 using ImmDomMap = std::unordered_map<ir::BasicBlock *, ir::BasicBlock *>;
 
-ImmDomMap getImmDoms(ir::BasicBlock *root) {
+ImmDomMap getImmDoms(const DomMap &dom_map) {
     ImmDomMap out{};
-
-    auto dom_map = getDomMap(root);
 
     for (const auto &[bb, doms] : dom_map) {
         auto doms_num = doms.size();
@@ -58,10 +56,10 @@ ImmDomMap getImmDoms(ir::BasicBlock *root) {
         }
 
         // Search for dominator that is dominated by all other dominators
-        auto it = std::find_if(doms.cbegin(), doms.cend(),
-                               [&](ir::BasicBlock *dom) -> bool {
-                                   return dom_map[dom].size() + 1 == doms_num;
-                               });
+        auto it = std::find_if(
+            doms.cbegin(), doms.cend(), [&](ir::BasicBlock *dom) -> bool {
+                return dom_map.at(dom).size() + 1 == doms_num;
+            });
 
         JA_ENSHURE(it != doms.cend());
 
@@ -69,6 +67,11 @@ ImmDomMap getImmDoms(ir::BasicBlock *root) {
     }
 
     return out;
+}
+
+ImmDomMap getImmDoms(ir::BasicBlock *root) {
+    auto dom_map = getDomMap(root);
+    return getImmDoms(dom_map);
 }
 
 std::string dumpImmDomMap(const ImmDomMap &map) {

@@ -10,6 +10,7 @@
 namespace jit_aot::ir {
 
 class Function;
+class Loop;
 
 class BasicBlock final {
   public:
@@ -82,6 +83,10 @@ class BasicBlock final {
         auto out = m_instrs.emplace(m_instrs.end(), std::move(b));
         m_succs = std::move(b_succ);
         m_have_branch = true;
+
+        for (auto succ : m_succs) {
+            succ->addPredecessor(this);
+        }
 
         return out;
     }
