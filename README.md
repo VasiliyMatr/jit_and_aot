@@ -25,3 +25,14 @@ For practice at JIT and AOT course
 
 ![](pics/tests/func_003_dom.svg)\
 *Dominator tree for test func #003*
+
+### Loop tree examples
+
+![](pics/tests/func_001_loop_tree.svg)\
+*Loop tree for test func #001*
+
+![](pics/tests/func_002_loop_tree.svg)\
+*Loop tree for test func #002*
+
+![](pics/tests/func_003_loop_tree.svg)\
+*Loop tree for test func #003*

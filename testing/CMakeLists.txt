@@ -40,8 +40,16 @@ target_link_libraries(dom_tests
     jit_aot::cfg_analyze
 )
 
+add_executable(loop_tree_tests src/loop_tree_tests.cpp)
+target_link_libraries(loop_tree_tests
+  PRIVATE
+    jit_aot::testing
+    jit_aot::cfg_analyze
+)
+
 include(GoogleTest)
 gtest_discover_tests(builder_tests)
 gtest_discover_tests(dfs_tests)
 gtest_discover_tests(rpo_tests)
 gtest_discover_tests(dom_tests)
+gtest_discover_tests(loop_tree_tests)
