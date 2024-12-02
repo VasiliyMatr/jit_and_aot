@@ -15,6 +15,15 @@ For practice at JIT and AOT course
 ![](pics/tests/func_003.svg)\
 *CFG for test func #003*
 
+![](pics/tests/func_004.svg)\
+*CFG for test func #004*
+
+![](pics/tests/func_005.svg)\
+*CFG for test func #005*
+
+![](pics/tests/func_006.svg)\
+*CFG for test func #006*
+
 ### Dominator tree examples
 
 ![](pics/tests/func_001_dom.svg)\
@@ -36,3 +45,12 @@ For practice at JIT and AOT course
 
 ![](pics/tests/func_003_loop_tree.svg)\
 *Loop tree for test func #003*
+
+![](pics/tests/func_004_loop_tree.svg)\
+*Loop tree for test func #004*
+
+![](pics/tests/func_005_loop_tree.svg)\
+*Loop tree for test func #005*
+
+![](pics/tests/func_006_loop_tree.svg)\
+*Loop tree for test func #006*

@@ -40,4 +40,34 @@ TEST(JA_LOOP_TREE, func3) {
     cfg::dumpLoopsToDot(loop_tree_dot, loops);
 }
 
+TEST(JA_LOOP_TREE, func4) {
+    ir::Builder builder{};
+    auto fn = makeTestFunc4(builder);
+
+    auto loops = cfg::getLoopTree(fn.entry());
+
+    std::ofstream loop_tree_dot{"func_004_loop_tree.dot"};
+    cfg::dumpLoopsToDot(loop_tree_dot, loops);
+}
+
+TEST(JA_LOOP_TREE, func5) {
+    ir::Builder builder{};
+    auto fn = makeTestFunc5(builder);
+
+    auto loops = cfg::getLoopTree(fn.entry());
+
+    std::ofstream loop_tree_dot{"func_005_loop_tree.dot"};
+    cfg::dumpLoopsToDot(loop_tree_dot, loops);
+}
+
+TEST(JA_LOOP_TREE, func6) {
+    ir::Builder builder{};
+    auto fn = makeTestFunc6(builder);
+
+    auto loops = cfg::getLoopTree(fn.entry());
+
+    std::ofstream loop_tree_dot{"func_006_loop_tree.dot"};
+    cfg::dumpLoopsToDot(loop_tree_dot, loops);
+}
+
 } // namespace jit_aot::testing

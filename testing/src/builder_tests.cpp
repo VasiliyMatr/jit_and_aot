@@ -40,4 +40,37 @@ TEST(JA_IR_BUILDER, makeFunc3) {
     ir_dot << fmt::format("{:dot}\n", fn);
 }
 
+TEST(JA_IR_BUILDER, makeFunc4) {
+    ir::Builder builder{};
+    auto fn = testing::makeTestFunc4(builder);
+
+    std::ofstream ir_txt{"func_004.txt"};
+    ir_txt << fmt::format("{}\n", fn);
+
+    std::ofstream ir_dot{"func_004.dot"};
+    ir_dot << fmt::format("{:dot}\n", fn);
+}
+
+TEST(JA_IR_BUILDER, makeFunc5) {
+    ir::Builder builder{};
+    auto fn = testing::makeTestFunc5(builder);
+
+    std::ofstream ir_txt{"func_005.txt"};
+    ir_txt << fmt::format("{}\n", fn);
+
+    std::ofstream ir_dot{"func_005.dot"};
+    ir_dot << fmt::format("{:dot}\n", fn);
+}
+
+TEST(JA_IR_BUILDER, makeFunc6) {
+    ir::Builder builder{};
+    auto fn = testing::makeTestFunc6(builder);
+
+    std::ofstream ir_txt{"func_006.txt"};
+    ir_txt << fmt::format("{}\n", fn);
+
+    std::ofstream ir_dot{"func_006.dot"};
+    ir_dot << fmt::format("{:dot}\n", fn);
+}
+
 } // namespace jit_aot
