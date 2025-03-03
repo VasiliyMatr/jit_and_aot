@@ -23,8 +23,8 @@ class BasicBlock final {
     Instrs m_instrs{};
     bool m_have_branch = false;
 
-    std::vector<BasicBlock *> m_preds{};
-    std::vector<BasicBlock *> m_succs{};
+    std::list<BasicBlock *> m_preds{};
+    std::list<BasicBlock *> m_succs{};
 
     // Flags placeholder for traversals
     uint64_t m_flags = 0;
@@ -76,7 +76,7 @@ class BasicBlock final {
   private:
     // Insert branch or return with successors setup
     auto insertBranchRaw(std::unique_ptr<instr::Instr> &&b,
-                         std::vector<BasicBlock *> &&b_succ) {
+                         std::list<BasicBlock *> &&b_succ) {
         JA_ENSHURE(!m_have_branch);
         JA_ENSHURE(instr::isBranch(b->type()));
 
@@ -93,12 +93,12 @@ class BasicBlock final {
 
   public:
     auto insertBranch(std::unique_ptr<instr::BrDirectUncond> &&b) {
-        std::vector<BasicBlock *> succ{b->dest};
+        std::list<BasicBlock *> succ{b->dest};
         return insertBranchRaw(std::move(b), std::move(succ));
     }
 
     auto insertBranch(std::unique_ptr<instr::BrDirectCond> &&b) {
-        std::vector<BasicBlock *> succ{b->dest, b->fallthrough};
+        std::list<BasicBlock *> succ{b->dest, b->fallthrough};
         return insertBranchRaw(std::move(b), std::move(succ));
     }
 
@@ -106,7 +106,19 @@ class BasicBlock final {
         return insertBranchRaw(std::move(b), {});
     }
 
-    void removeInstr(Instrs::iterator pos) { m_instrs.erase(pos); }
+    void removeInstr(Instrs::iterator pos) {
+        auto *instr = pos->get();
+        JA_ENSHURE(instr->usersBegin() == instr->usersEnd());
+
+        for (auto it = instr->opBegin(), end = instr->opEnd(); it != end; ++it) {
+            auto prod = (*it)->producer();
+            if (prod != nullptr) {
+                prod->removeUser(instr);
+            }
+        }
+
+        m_instrs.erase(pos);
+    }
 
     JA_NODISCARD auto flags() const noexcept { return m_flags; }
     JA_NODISCARD bool testFlags(uint64_t mask) const noexcept {

@@ -8,13 +8,14 @@ using namespace jit_aot::ir;
 int main() {
     IntType i32{32};
 
+    Module mod{};
     Builder builder{};
-    Function fact_func{i32, {i32}};
-    fact_func.setName("fact");
+    builder.setMod(&mod);
 
-    builder.setFunc(&fact_func);
+    auto *fact_func = builder.newFunc(i32, {i32});
+    fact_func->setName("fact");
 
-    auto v0 = fact_func.nthArg(0);
+    auto v0 = fact_func->nthArg(0);
 
     const auto *const_zero = builder.makeIntConst(i32, 0);
     const auto *const_one = builder.makeIntConst(i32, 1);
@@ -64,12 +65,12 @@ int main() {
 
     {
         std::ofstream ir_txt{"ir.txt"};
-        ir_txt << fmt::format("{}\n", fact_func);
+        ir_txt << fmt::format("{}\n", *fact_func);
     }
 
     {
         std::ofstream ir_dot{"ir.dot"};
-        ir_dot << fmt::format("{:dot}\n", fact_func);
+        ir_dot << fmt::format("{:dot}\n", *fact_func);
     }
 
     return 0;

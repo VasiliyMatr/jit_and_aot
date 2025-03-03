@@ -7,62 +7,70 @@
 namespace jit_aot::testing {
 
 TEST(JA_DFS, func1) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc1(builder);
+    builder.setMod(&mod);
 
-    auto dfs_order = cfg::getDfsOrder(fn.entry());
+    auto *fn = makeTestFunc1(builder);
 
-    auto *A = fn.getBb("A");
-    auto *B = fn.getBb("B");
-    auto *C = fn.getBb("C");
-    auto *D = fn.getBb("D");
-    auto *E = fn.getBb("E");
-    auto *F = fn.getBb("F");
-    auto *G = fn.getBb("G");
+    auto dfs_order = cfg::getDfsOrder(fn->entry());
+
+    auto *A = fn->getBb("A");
+    auto *B = fn->getBb("B");
+    auto *C = fn->getBb("C");
+    auto *D = fn->getBb("D");
+    auto *E = fn->getBb("E");
+    auto *F = fn->getBb("F");
+    auto *G = fn->getBb("G");
 
     EXPECT_THAT(dfs_order, ::testing::ElementsAre(A, B, C, D, F, E, G));
 }
 
 TEST(JA_DFS, func2) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc2(builder);
+    builder.setMod(&mod);
 
-    auto dfs_order = cfg::getDfsOrder(fn.entry());
+    auto *fn = makeTestFunc2(builder);
 
-    auto *A = fn.getBb("A");
-    auto *B = fn.getBb("B");
-    auto *C = fn.getBb("C");
-    auto *D = fn.getBb("D");
-    auto *E = fn.getBb("E");
-    auto *F = fn.getBb("F");
-    auto *G = fn.getBb("G");
-    auto *H = fn.getBb("H");
-    auto *I = fn.getBb("I");
-    auto *J = fn.getBb("J");
-    auto *K = fn.getBb("K");
+    auto dfs_order = cfg::getDfsOrder(fn->entry());
+
+    auto *A = fn->getBb("A");
+    auto *B = fn->getBb("B");
+    auto *C = fn->getBb("C");
+    auto *D = fn->getBb("D");
+    auto *E = fn->getBb("E");
+    auto *F = fn->getBb("F");
+    auto *G = fn->getBb("G");
+    auto *H = fn->getBb("H");
+    auto *I = fn->getBb("I");
+    auto *J = fn->getBb("J");
+    auto *K = fn->getBb("K");
 
     EXPECT_THAT(dfs_order,
                 ::testing::ElementsAre(A, B, C, D, E, F, G, H, I, K, J));
 }
 
 TEST(JA_DFS, func3) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc3(builder);
+    builder.setMod(&mod);
 
-    auto dfs_order = cfg::getDfsOrder(fn.entry());
+    auto *fn = makeTestFunc3(builder);
 
-    auto *A = fn.getBb("A");
-    auto *B = fn.getBb("B");
-    auto *C = fn.getBb("C");
-    auto *D = fn.getBb("D");
-    auto *E = fn.getBb("E");
-    auto *F = fn.getBb("F");
-    auto *G = fn.getBb("G");
-    auto *H = fn.getBb("H");
-    auto *I = fn.getBb("I");
+    auto dfs_order = cfg::getDfsOrder(fn->entry());
 
-    EXPECT_THAT(dfs_order,
-                ::testing::ElementsAre(A, B, C, D, G, I, E, F, H));
+    auto *A = fn->getBb("A");
+    auto *B = fn->getBb("B");
+    auto *C = fn->getBb("C");
+    auto *D = fn->getBb("D");
+    auto *E = fn->getBb("E");
+    auto *F = fn->getBb("F");
+    auto *G = fn->getBb("G");
+    auto *H = fn->getBb("H");
+    auto *I = fn->getBb("I");
+
+    EXPECT_THAT(dfs_order, ::testing::ElementsAre(A, B, C, D, G, I, E, F, H));
 }
 
 } // namespace jit_aot::testing

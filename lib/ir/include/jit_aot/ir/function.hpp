@@ -7,6 +7,8 @@
 
 namespace jit_aot::ir {
 
+class Module;
+
 using FuncEntityId = int;
 static_assert(std::is_same_v<FuncEntityId, ValueId>,
               "Values are indexed as functions entities");
@@ -16,6 +18,8 @@ class Function final {
     using BasicBlocks = std::list<BasicBlock>;
 
     std::string m_name = "";
+    Module *m_module = nullptr;
+
     BasicBlocks m_bbs{};
     BasicBlock *m_entry = nullptr;
 
@@ -28,8 +32,8 @@ class Function final {
     // Get next function entity id
     auto nextId() noexcept { return m_next_id++; }
 
-    Function(IntType ret_type, std::vector<IntType> args_types)
-        : m_ret_type(ret_type) {
+    Function(Module *module, IntType ret_type, std::vector<IntType> args_types)
+        : m_module(module), m_ret_type(ret_type) {
         m_args.reserve(args_types.size());
 
         for (auto &&arg_type : args_types) {
@@ -39,6 +43,8 @@ class Function final {
 
     void setName(std::string name) noexcept { m_name = std::move(name); }
     JA_NODISCARD std::string_view name() const noexcept { return m_name; }
+
+    JA_NODISCARD auto *module() const noexcept { return m_module; }
 
     JA_NODISCARD auto retType() const noexcept { return m_ret_type; }
     JA_NODISCARD const auto *argsBegin() const noexcept {

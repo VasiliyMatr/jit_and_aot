@@ -7,64 +7,82 @@
 
 namespace jit_aot::testing {
 
-// WARNING: loop tree tests don't include actual checks for now. But dumps can be
-// checked manually
+// WARNING: loop tree tests don't include actual checks for now. But dumps can
+// be checked manually
 
 TEST(JA_LOOP_TREE, func1) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc1(builder);
+    builder.setMod(&mod);
 
-    auto loops = cfg::getLoopTree(fn.entry());
+    auto *fn = makeTestFunc1(builder);
+
+    auto loops = cfg::getLoopTree(fn->entry());
 
     std::ofstream loop_tree_dot{"func_001_loop_tree.dot"};
     cfg::dumpLoopsToDot(loop_tree_dot, loops);
 }
 
 TEST(JA_LOOP_TREE, func2) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc2(builder);
+    builder.setMod(&mod);
 
-    auto loops = cfg::getLoopTree(fn.entry());
+    auto *fn = makeTestFunc2(builder);
+
+    auto loops = cfg::getLoopTree(fn->entry());
 
     std::ofstream loop_tree_dot{"func_002_loop_tree.dot"};
     cfg::dumpLoopsToDot(loop_tree_dot, loops);
 }
 
 TEST(JA_LOOP_TREE, func3) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc3(builder);
+    builder.setMod(&mod);
 
-    auto loops = cfg::getLoopTree(fn.entry());
+    auto *fn = makeTestFunc3(builder);
+
+    auto loops = cfg::getLoopTree(fn->entry());
 
     std::ofstream loop_tree_dot{"func_003_loop_tree.dot"};
     cfg::dumpLoopsToDot(loop_tree_dot, loops);
 }
 
 TEST(JA_LOOP_TREE, func4) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc4(builder);
+    builder.setMod(&mod);
 
-    auto loops = cfg::getLoopTree(fn.entry());
+    auto *fn = makeTestFunc4(builder);
+
+    auto loops = cfg::getLoopTree(fn->entry());
 
     std::ofstream loop_tree_dot{"func_004_loop_tree.dot"};
     cfg::dumpLoopsToDot(loop_tree_dot, loops);
 }
 
 TEST(JA_LOOP_TREE, func5) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc5(builder);
+    builder.setMod(&mod);
 
-    auto loops = cfg::getLoopTree(fn.entry());
+    auto *fn = makeTestFunc5(builder);
+
+    auto loops = cfg::getLoopTree(fn->entry());
 
     std::ofstream loop_tree_dot{"func_005_loop_tree.dot"};
     cfg::dumpLoopsToDot(loop_tree_dot, loops);
 }
 
 TEST(JA_LOOP_TREE, func6) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc6(builder);
+    builder.setMod(&mod);
 
-    auto loops = cfg::getLoopTree(fn.entry());
+    auto *fn = makeTestFunc6(builder);
+
+    auto loops = cfg::getLoopTree(fn->entry());
 
     std::ofstream loop_tree_dot{"func_006_loop_tree.dot"};
     cfg::dumpLoopsToDot(loop_tree_dot, loops);

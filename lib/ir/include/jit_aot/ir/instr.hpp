@@ -20,6 +20,8 @@ enum class InstrType {
     kIntBinArithSub,
     kIntBinArithMul,
     kIntBinArithDiv,
+    kIntBinArithShl,
+    kIntBinArithOr,
 
     kIntBinCmpLl,
     kIntBinCmpGg,
@@ -41,6 +43,8 @@ inline constexpr bool isIntBin(InstrType instr_type) {
     case InstrType::kIntBinArithSub:
     case InstrType::kIntBinArithMul:
     case InstrType::kIntBinArithDiv:
+    case InstrType::kIntBinArithShl:
+    case InstrType::kIntBinArithOr:
     case InstrType::kIntBinCmpLl:
     case InstrType::kIntBinCmpGg:
     case InstrType::kIntBinCmpEq:
@@ -79,7 +83,7 @@ class Instr {
         addThisAsUser();
     }
 
-    virtual ~Instr() = default;
+    virtual ~Instr() = 0;
 
     // Get instr type
     JA_NODISCARD auto type() const noexcept { return m_type; }
@@ -110,6 +114,8 @@ class Instr {
     // Return true if user was removed and false otherwise
     bool removeUser(Instr *user) { return std::erase(m_users, user); }
 
+    void clearUsers() { m_users.clear(); }
+
     // Format instr to `out` and return new iterator
     JA_NODISCARD virtual fmt_it format(fmt_it out) const;
 
@@ -124,6 +130,8 @@ class Instr {
     }
 };
 
+inline Instr::~Instr() = default;
+
 // Base class for instructions with int result
 class IntResInstr : public Instr {
     IntValue m_result;
@@ -135,6 +143,35 @@ class IntResInstr : public Instr {
 
     JA_NODISCARD const IntValue *result() const noexcept override {
         return &m_result;
+    }
+
+    void replaceUses(const Value *new_value) {
+        if (auto *prod = new_value->producer()) {
+            replaceUses(new_value, static_cast<IntResInstr *>(prod));
+        } else {
+            replaceUses(new_value, nullptr);
+        }
+    }
+
+  private:
+    void replaceUses(const Value *new_value, IntResInstr *new_producer) {
+        auto res_id = m_result.id();
+
+        for (auto *user : m_users) {
+            for (auto it = user->opBegin(), end = user->opEnd(); it != end;
+                 ++it) {
+                const auto *&op = *it;
+                if (op->id() == res_id) {
+                    op = new_value;
+                }
+            }
+
+            if (new_producer != nullptr) {
+                new_producer->addUser(user);
+            }
+        }
+
+        clearUsers();
     }
 };
 

@@ -25,7 +25,7 @@ class Value {
         : m_id(id), m_producer(producer) {}
 
   public:
-    ~Value() = default;
+    virtual ~Value() = default;
 
     JA_NODISCARD auto id() const noexcept { return m_id; }
     JA_NODISCARD auto *producer() const noexcept { return m_producer; }

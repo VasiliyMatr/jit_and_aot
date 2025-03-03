@@ -21,33 +21,42 @@ void testRpo(const std::vector<ir::BasicBlock *> rpo) {
 }
 
 TEST(JA_RPO, func1) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc1(builder);
+    builder.setMod(&mod);
 
-    auto rpo = cfg::getRpoOrder(fn.entry(), fn.getBbNum());
-    ASSERT_EQ(rpo.size(), fn.getBbNum());
+    auto *fn = makeTestFunc1(builder);
+
+    auto rpo = cfg::getRpoOrder(fn->entry(), fn->getBbNum());
+    ASSERT_EQ(rpo.size(), fn->getBbNum());
     testRpo(rpo);
 }
 
 TEST(JA_RPO, func2) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc2(builder);
+    builder.setMod(&mod);
 
-    auto rpo_order = cfg::getRpoOrder(fn.entry(), fn.getBbNum());
+    auto *fn = makeTestFunc2(builder);
 
-    auto rpo = cfg::getRpoOrder(fn.entry(), fn.getBbNum());
-    ASSERT_EQ(rpo.size(), fn.getBbNum());
+    auto rpo_order = cfg::getRpoOrder(fn->entry(), fn->getBbNum());
+
+    auto rpo = cfg::getRpoOrder(fn->entry(), fn->getBbNum());
+    ASSERT_EQ(rpo.size(), fn->getBbNum());
     testRpo(rpo);
 }
 
 TEST(JA_RPO, func3) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc3(builder);
+    builder.setMod(&mod);
 
-    auto rpo_order = cfg::getRpoOrder(fn.entry(), fn.getBbNum());
+    auto *fn = makeTestFunc3(builder);
 
-    auto rpo = cfg::getRpoOrder(fn.entry(), fn.getBbNum());
-    ASSERT_EQ(rpo.size(), fn.getBbNum());
+    auto rpo_order = cfg::getRpoOrder(fn->entry(), fn->getBbNum());
+
+    auto rpo = cfg::getRpoOrder(fn->entry(), fn->getBbNum());
+    ASSERT_EQ(rpo.size(), fn->getBbNum());
     testRpo(rpo);
 }
 

@@ -73,6 +73,12 @@ struct fmt::formatter<jit_aot::ir::instr::InstrType>
         case jit_aot::ir::instr::InstrType::kIntBinArithDiv:
             name = "div";
             break;
+        case jit_aot::ir::instr::InstrType::kIntBinArithShl:
+            name = "shl";
+            break;
+        case jit_aot::ir::instr::InstrType::kIntBinArithOr:
+            name = "or";
+            break;
         case jit_aot::ir::instr::InstrType::kIntBinCmpEq:
             name = "cmp.eq";
             break;

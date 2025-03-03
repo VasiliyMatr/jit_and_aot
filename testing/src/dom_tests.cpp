@@ -11,30 +11,39 @@ namespace jit_aot::testing {
 // checked manually
 
 TEST(JA_DOM_TREE, func1) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc1(builder);
+    builder.setMod(&mod);
 
-    auto imm_dom_map = cfg::getImmDoms(fn.entry());
+    auto *fn = makeTestFunc1(builder);
+
+    auto imm_dom_map = cfg::getImmDoms(fn->entry());
 
     std::ofstream dom_dot{"func_001_dom.dot"};
     dom_dot << cfg::dumpImmDomMap(imm_dom_map);
 }
 
 TEST(JA_DOM_TREE, func2) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc2(builder);
+    builder.setMod(&mod);
 
-    auto imm_dom_map = cfg::getImmDoms(fn.entry());
+    auto *fn = makeTestFunc2(builder);
+
+    auto imm_dom_map = cfg::getImmDoms(fn->entry());
 
     std::ofstream dom_dot{"func_002_dom.dot"};
     dom_dot << cfg::dumpImmDomMap(imm_dom_map);
 }
 
 TEST(JA_DOM_TREE, func3) {
+    ir::Module mod;
     ir::Builder builder{};
-    auto fn = makeTestFunc3(builder);
+    builder.setMod(&mod);
 
-    auto imm_dom_map = cfg::getImmDoms(fn.entry());
+    auto *fn = makeTestFunc3(builder);
+
+    auto imm_dom_map = cfg::getImmDoms(fn->entry());
 
     std::ofstream dom_dot{"func_003_dom.dot"};
     dom_dot << cfg::dumpImmDomMap(imm_dom_map);

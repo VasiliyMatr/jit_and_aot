@@ -7,13 +7,12 @@ namespace jit_aot::testing {
 
 static const ir::IntType i32{32};
 
-ir::Function makeTestFunc1(ir::Builder &builder) {
-    ir::Function fn{i32, {i32, i32}};
-    fn.setName("test_func_001");
-    builder.setFunc(&fn);
+ir::Function *makeTestFunc1(ir::Builder &builder) {
+    auto *fn = builder.newFunc({i32}, {i32, i32});
+    fn->setName("test_func_001");
 
-    auto *v0 = fn.nthArg(0);
-    auto *v1 = fn.nthArg(1);
+    auto *v0 = fn->nthArg(0);
+    auto *v1 = fn->nthArg(1);
 
     auto *A = builder.newBb("A", true);
     auto *B = builder.newBb("B");
@@ -47,15 +46,14 @@ ir::Function makeTestFunc1(ir::Builder &builder) {
     return fn;
 }
 
-ir::Function makeTestFunc2(ir::Builder &builder) {
-    ir::Function fn{i32, {i32, i32, i32, i32}};
-    fn.setName("test_func_002");
-    builder.setFunc(&fn);
+ir::Function *makeTestFunc2(ir::Builder &builder) {
+    auto *fn = builder.newFunc(i32, {i32, i32, i32, i32});
+    fn->setName("test_func_002");
 
-    auto *v0 = fn.nthArg(0);
-    auto *v1 = fn.nthArg(1);
-    auto *v2 = fn.nthArg(2);
-    auto *v3 = fn.nthArg(3);
+    auto *v0 = fn->nthArg(0);
+    auto *v1 = fn->nthArg(1);
+    auto *v2 = fn->nthArg(2);
+    auto *v3 = fn->nthArg(3);
 
     auto *A = builder.newBb("A", true);
     auto *B = builder.newBb("B");
@@ -105,16 +103,15 @@ ir::Function makeTestFunc2(ir::Builder &builder) {
     return fn;
 }
 
-ir::Function makeTestFunc3(ir::Builder &builder) {
-    ir::Function fn{i32, {i32, i32, i32, i32, i32}};
-    fn.setName("test_func_003");
-    builder.setFunc(&fn);
+ir::Function *makeTestFunc3(ir::Builder &builder) {
+    auto *fn = builder.newFunc(i32, {i32, i32, i32, i32, i32});
+    fn->setName("test_func_003");
 
-    auto *v0 = fn.nthArg(0);
-    auto *v1 = fn.nthArg(1);
-    auto *v2 = fn.nthArg(2);
-    auto *v3 = fn.nthArg(3);
-    auto *v4 = fn.nthArg(4);
+    auto *v0 = fn->nthArg(0);
+    auto *v1 = fn->nthArg(1);
+    auto *v2 = fn->nthArg(2);
+    auto *v3 = fn->nthArg(3);
+    auto *v4 = fn->nthArg(4);
 
     auto *A = builder.newBb("A", true);
     auto *B = builder.newBb("B");
@@ -156,12 +153,11 @@ ir::Function makeTestFunc3(ir::Builder &builder) {
     return fn;
 }
 
-ir::Function makeTestFunc4(ir::Builder &builder) {
-    ir::Function fn{i32, {i32}};
-    fn.setName("test_func_004");
-    builder.setFunc(&fn);
+ir::Function *makeTestFunc4(ir::Builder &builder) {
+    auto *fn = builder.newFunc(i32, {i32});
+    fn->setName("test_func_004");
 
-    auto *v0 = fn.nthArg(0);
+    auto *v0 = fn->nthArg(0);
 
     auto *A = builder.newBb("A", true);
     auto *B = builder.newBb("B");
@@ -187,13 +183,12 @@ ir::Function makeTestFunc4(ir::Builder &builder) {
     return fn;
 }
 
-ir::Function makeTestFunc5(ir::Builder &builder) {
-    ir::Function fn{i32, {i32, i32}};
-    fn.setName("test_func_005");
-    builder.setFunc(&fn);
+ir::Function *makeTestFunc5(ir::Builder &builder) {
+    auto *fn = builder.newFunc(i32, {i32, i32});
+    fn->setName("test_func_005");
 
-    auto *v0 = fn.nthArg(0);
-    auto *v1 = fn.nthArg(1);
+    auto *v0 = fn->nthArg(0);
+    auto *v1 = fn->nthArg(1);
 
     auto *A = builder.newBb("A", true);
     auto *B = builder.newBb("B");
@@ -223,14 +218,13 @@ ir::Function makeTestFunc5(ir::Builder &builder) {
     return fn;
 }
 
-ir::Function makeTestFunc6(ir::Builder &builder) {
-    ir::Function fn{i32, {i32, i32, i32}};
-    fn.setName("test_func_006");
-    builder.setFunc(&fn);
+ir::Function *makeTestFunc6(ir::Builder &builder) {
+    auto *fn = builder.newFunc(i32, {i32, i32, i32});
+    fn->setName("test_func_006");
 
-    auto *v0 = fn.nthArg(0);
-    auto *v1 = fn.nthArg(1);
-    auto *v2 = fn.nthArg(2);
+    auto *v0 = fn->nthArg(0);
+    auto *v1 = fn->nthArg(1);
+    auto *v2 = fn->nthArg(2);
 
     auto *A = builder.newBb("A", true);
     auto *B = builder.newBb("B");
