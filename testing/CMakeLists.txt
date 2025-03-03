@@ -47,9 +47,17 @@ target_link_libraries(loop_tree_tests
     jit_aot::cfg_analyze
 )
 
+add_executable(peephole_tests src/peephole_tests.cpp)
+target_link_libraries(peephole_tests
+  PRIVATE
+    jit_aot::testing
+    jit_aot::peephole
+)
+
 include(GoogleTest)
 gtest_discover_tests(builder_tests)
 gtest_discover_tests(dfs_tests)
 gtest_discover_tests(rpo_tests)
 gtest_discover_tests(dom_tests)
 gtest_discover_tests(loop_tree_tests)
+gtest_discover_tests(peephole_tests)
