@@ -38,6 +38,16 @@ peephole::SubPeephole::apply(ir::BasicBlock::Instrs::iterator it,
         return {true, it};
     }
 
+    // [3] x - x -> 0
+    if (op1->id() == op2->id()) {
+        auto *res = bb.function()->module()->addIntConst(op1_const->type(), 0);
+
+        instr->replaceUses(res);
+
+        bb.removeInstr(it++);
+        return {true, it};
+    }
+
     return {false, it};
 }
 
