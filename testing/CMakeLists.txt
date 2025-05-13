@@ -54,6 +54,13 @@ target_link_libraries(peephole_tests
     jit_aot::peephole
 )
 
+add_executable(check_elimination_tests src/check_elimination_tests.cpp)
+target_link_libraries(check_elimination_tests
+  PRIVATE
+    jit_aot::testing
+    jit_aot::check_elimination
+)
+
 include(GoogleTest)
 gtest_discover_tests(builder_tests)
 gtest_discover_tests(dfs_tests)
@@ -61,3 +68,4 @@ gtest_discover_tests(rpo_tests)
 gtest_discover_tests(dom_tests)
 gtest_discover_tests(loop_tree_tests)
 gtest_discover_tests(peephole_tests)
+gtest_discover_tests(check_elimination_tests)
