@@ -6,24 +6,24 @@
 
 using namespace jit_aot;
 
-static const ir::IntType i32{32};
-
 int main() {
     ir::Module mod;
     ir::Builder builder{};
     builder.setMod(&mod);
 
+    const auto *i32 = builder.makeIntType(32);
+
     auto *fn = builder.newFunc(i32, {i32, i32});
     fn->setName("foo");
 
-    auto arg0 = fn->nthArg(0);
-    auto arg1 = fn->nthArg(1);
+    auto arg0 = fn->nthArgAs<ir::IntValue>(0);
+    auto arg1 = fn->nthArgAs<ir::IntValue>(1);
 
     builder.newBb("bb1");
 
-    auto *const_42 = builder.makeIntConst(i32, 42);
-    auto *const_10 = builder.makeIntConst(i32, 10);
-    auto *const_0 = builder.makeIntConst(i32, 0);
+    auto *const_42 = builder.makeIntConst(*i32, 42);
+    auto *const_10 = builder.makeIntConst(*i32, 10);
+    auto *const_0 = builder.makeIntConst(*i32, 0);
 
     auto *v0 = builder.makeSub(arg0, const_0);
     auto *v1 = builder.makeSub(const_42, const_0);

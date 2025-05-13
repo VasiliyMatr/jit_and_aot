@@ -23,8 +23,8 @@ class Function final {
     BasicBlocks m_bbs{};
     BasicBlock *m_entry = nullptr;
 
-    IntType m_ret_type;
-    std::vector<IntFuncArg> m_args{};
+    const InterfaceValueType *m_ret_type = nullptr;
+    std::vector<std::unique_ptr<Value>> m_args{};
 
     FuncEntityId m_next_id = 0;
 
@@ -32,12 +32,25 @@ class Function final {
     // Get next function entity id
     auto nextId() noexcept { return m_next_id++; }
 
-    Function(Module *module, IntType ret_type, std::vector<IntType> args_types)
+    Function(Module *module, const InterfaceValueType *ret_type,
+             std::vector<const InterfaceValueType *> args_types)
         : m_module(module), m_ret_type(ret_type) {
         m_args.reserve(args_types.size());
 
         for (auto &&arg_type : args_types) {
-            m_args.emplace_back(arg_type, nextId());
+            if (auto int_ty = dynamic_cast<const IntType *>(arg_type)) {
+                m_args.emplace_back(
+                    std::make_unique<IntValue>(*int_ty, nextId(), nullptr));
+                continue;
+            }
+
+            if (auto ptr_ty = dynamic_cast<const PointerType *>(arg_type)) {
+                m_args.emplace_back(
+                    std::make_unique<Pointer>(ptr_ty, nextId(), nullptr));
+                continue;
+            }
+
+            throw std::runtime_error("Unknown argument type");
         }
     }
 
@@ -46,7 +59,7 @@ class Function final {
 
     JA_NODISCARD auto *module() const noexcept { return m_module; }
 
-    JA_NODISCARD auto retType() const noexcept { return m_ret_type; }
+    JA_NODISCARD const auto *retType() const noexcept { return m_ret_type; }
     JA_NODISCARD const auto *argsBegin() const noexcept {
         return m_args.data();
     }
@@ -54,7 +67,10 @@ class Function final {
         return m_args.data() + m_args.size();
     }
     JA_NODISCARD const auto *nthArg(size_t n) const noexcept {
-        return m_args.data() + n;
+        return m_args[n].get();
+    }
+    template <class T> JA_NODISCARD const T *nthArgAs(size_t n) const noexcept {
+        return dynamic_cast<const T *>(nthArg(n));
     }
 
     JA_NODISCARD auto begin() noexcept { return m_bbs.begin(); }

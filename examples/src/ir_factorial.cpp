@@ -6,20 +6,20 @@
 using namespace jit_aot::ir;
 
 int main() {
-    IntType i32{32};
-
     Module mod{};
     Builder builder{};
     builder.setMod(&mod);
 
+    const auto *i32 = builder.makeIntType(32);
+
     auto *fact_func = builder.newFunc(i32, {i32});
     fact_func->setName("fact");
 
-    auto v0 = fact_func->nthArg(0);
+    auto v0 = fact_func->nthArgAs<IntValue>(0);
 
-    const auto *const_zero = builder.makeIntConst(i32, 0);
-    const auto *const_one = builder.makeIntConst(i32, 1);
-    const auto *const_two = builder.makeIntConst(i32, 2);
+    const auto *const_zero = builder.makeIntConst(*i32, 0);
+    const auto *const_one = builder.makeIntConst(*i32, 1);
+    const auto *const_two = builder.makeIntConst(*i32, 2);
 
     auto bb_init = builder.newBb("init", true);
     auto bb_cond = builder.newBb("cond");
@@ -36,11 +36,11 @@ int main() {
     // Build cond bb
     builder.setPos(bb_cond, bb_cond->end());
 
-    auto *phi1 = builder.makePhiNode(i32);
+    auto *phi1 = builder.makePhiNode(*i32);
     auto v3 = phi1->result();
     phi1->addMapping(bb_init, v1);
 
-    auto *phi2 = builder.makePhiNode(i32);
+    auto *phi2 = builder.makePhiNode(*i32);
     auto v4 = phi2->result();
     phi2->addMapping(bb_init, v2);
 

@@ -7,11 +7,15 @@ namespace jit_aot::ir {
 
 class Module final {
     std::list<IntConstant> m_consts{};
+    std::vector<std::unique_ptr<InterfaceValueType>> m_types{};
     std::list<Function> m_functions{};
 
   public:
     JA_NODISCARD const auto &consts() const noexcept { return m_consts; }
     JA_NODISCARD auto &consts() noexcept { return m_consts; }
+
+    JA_NODISCARD const auto &types() const noexcept { return m_types; }
+    JA_NODISCARD auto &types() noexcept { return m_types; }
 
     JA_NODISCARD const auto &functions() const noexcept { return m_functions; }
     JA_NODISCARD auto &functions() noexcept { return m_functions; }
@@ -20,7 +24,12 @@ class Module final {
         return &m_consts.emplace_back(type, value);
     }
 
-    Function *addFunc(IntType ret_type, std::vector<IntType> args_types) {
+    InterfaceValueType *addType(std::unique_ptr<InterfaceValueType> type) {
+        return m_types.emplace_back(std::move(type)).get();
+    }
+
+    Function *addFunc(const InterfaceValueType *ret_type,
+                      std::vector<const InterfaceValueType *> args_types) {
         return &m_functions.emplace_back(this, ret_type, std::move(args_types));
     }
 };

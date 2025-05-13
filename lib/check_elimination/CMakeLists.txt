@@ -1,0 +1,5 @@
+add_library(jit_aot_check_elimination INTERFACE)
+add_library(jit_aot::check_elimination ALIAS jit_aot_check_elimination)
+
+target_include_directories(jit_aot_check_elimination INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(jit_aot_check_elimination INTERFACE fmt::fmt jit_aot::cfg_analyze)

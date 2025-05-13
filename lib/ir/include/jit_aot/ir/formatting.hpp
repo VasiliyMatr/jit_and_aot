@@ -25,6 +25,15 @@ struct fmt::formatter<jit_aot::ir::IntType>
     }
 };
 
+template <>
+struct fmt::formatter<jit_aot::ir::PointerType>
+    : public jit_aot::IFmtNoParseFormatter {
+    auto format(const jit_aot::ir::PointerType &pointer_type,
+                format_context &ctx) const {
+        return pointer_type.format(ctx.out());
+    }
+};
+
 /// Values formatting
 
 template <>
@@ -44,10 +53,10 @@ struct fmt::formatter<jit_aot::ir::IntValue>
 };
 
 template <>
-struct fmt::formatter<jit_aot::ir::IntFuncArg>
+struct fmt::formatter<jit_aot::ir::Pointer>
     : public jit_aot::IFmtNoParseFormatter {
-    auto format(const jit_aot::ir::IntFuncArg &arg, format_context &ctx) const {
-        return arg.format(ctx.out());
+    auto format(const jit_aot::ir::Pointer &ptr, format_context &ctx) const {
+        return ptr.format(ctx.out());
     }
 };
 
@@ -99,6 +108,12 @@ struct fmt::formatter<jit_aot::ir::instr::InstrType>
             break;
         case jit_aot::ir::instr::InstrType::kReturn:
             name = "return";
+            break;
+        case jit_aot::ir::instr::InstrType::kNullCheck:
+            name = "null_check";
+            break;
+        case jit_aot::ir::instr::InstrType::kBoundCheck:
+            name = "bound_check";
             break;
 
         default:
@@ -248,12 +263,13 @@ struct fmt::formatter<jit_aot::ir::Function>
     format_default(const jit_aot::ir::Function &func,
                    fmt::format_context &ctx) const override {
         auto out =
-            fmt::format_to(ctx.out(), "{} {} (", func.retType(), func.name());
+            fmt::format_to(ctx.out(), "{} {} (", *func.retType(), func.name());
 
         bool first = true;
         for (auto arg_it = func.argsBegin(), end = func.argsEnd();
              arg_it != end; ++arg_it) {
-            out = fmt::format_to(out, "{}{}", first ? "" : ", ", *arg_it);
+            out = fmt::format_to(out, "{}", first ? "" : ", ");
+            out = arg_it->get()->format(out);
             first = false;
         }
 

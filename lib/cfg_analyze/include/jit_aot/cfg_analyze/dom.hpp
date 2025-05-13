@@ -41,6 +41,23 @@ DomMap getDomMap(ir::BasicBlock *root) {
     return out;
 }
 
+// [bb -> dominated]
+using RevDomMap =
+    std::unordered_map<ir::BasicBlock *, std::vector<ir::BasicBlock *>>;
+
+RevDomMap getRevDomMap(ir::BasicBlock *root) {
+    auto dom_map = getDomMap(root);
+    RevDomMap out{};
+
+    for (auto &&[bb, dominators] : dom_map) {
+        for (auto dominator : dominators) {
+            out[dominator].emplace_back(bb);
+        }
+    }
+
+    return out;
+}
+
 // [bb -> imm dominator]
 using ImmDomMap = std::unordered_map<ir::BasicBlock *, ir::BasicBlock *>;
 

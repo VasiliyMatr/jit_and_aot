@@ -18,7 +18,8 @@ class Builder final {
     JA_NODISCARD auto *func() const noexcept { return m_curr_func; }
     void setFunc(Function *func) { m_curr_func = func; }
 
-    auto *newFunc(IntType ret_type, std::vector<IntType> args_types) {
+    auto *newFunc(const InterfaceValueType *ret_type,
+                  std::vector<const InterfaceValueType *> args_types) {
         m_curr_bb = nullptr;
         return m_curr_func =
                    m_curr_mod->addFunc(ret_type, std::move(args_types));
@@ -42,6 +43,16 @@ class Builder final {
     void setPos(BasicBlock *bb) {
         m_curr_bb = bb;
         m_curr_bb_pos = m_curr_bb->end();
+    }
+
+    const auto *makeIntType(IntType type) {
+        return static_cast<const IntType *>(
+            m_curr_mod->addType(std::make_unique<IntType>(type)));
+    }
+
+    const auto *makePointerType(const InterfaceValueType *pointee) {
+        return static_cast<const PointerType *>(
+            m_curr_mod->addType(std::make_unique<PointerType>(pointee)));
     }
 
     const auto *makeIntConst(IntType type, uint64_t value) {
@@ -122,6 +133,16 @@ class Builder final {
     void makeReturn(const IntValue *value) {
         auto instr = std::make_unique<instr::Return>(value);
         m_curr_bb->insertBranch(std::move(instr));
+    }
+
+    void makeNullCheck(const Pointer *pointer) {
+        auto instr = std::make_unique<instr::NullCheck>(pointer);
+        m_curr_bb->insert(std::move(instr), m_curr_bb_pos);
+    }
+
+    void makeBoundCheck(const IntValue *index, const IntValue *bound) {
+        auto instr = std::make_unique<instr::BoundCheck>(index, bound);
+        m_curr_bb->insert(std::move(instr), m_curr_bb_pos);
     }
 };
 

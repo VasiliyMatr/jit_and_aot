@@ -2,6 +2,7 @@
 #define TYPES_HPP
 
 #include <compare>
+#include <memory>
 
 #include <jit_aot/common.hpp>
 
@@ -21,6 +22,18 @@ struct IntType final : public InterfaceValueType {
 
     JA_NODISCARD fmt_it format(fmt_it out) const override {
         return fmt::format_to(out, "i{}", size);
+    }
+};
+
+struct PointerType final : public InterfaceValueType {
+    const InterfaceValueType *pointee_type = nullptr;
+
+    explicit PointerType(const InterfaceValueType *pointee_type)
+        : pointee_type(pointee_type) {}
+
+    JA_NODISCARD fmt_it format(fmt_it out) const override {
+        out = fmt::format_to(out, "ptr ");
+        return pointee_type->format(out);
     }
 };
 

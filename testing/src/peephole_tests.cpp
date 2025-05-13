@@ -15,16 +15,18 @@ TEST(JA_PEEPHOLE, Sub) {
     ir::Builder builder{};
     builder.setMod(&mod);
 
+    const auto *i32 = builder.makeIntType(32);
+
     auto *fn = builder.newFunc(i32, {i32});
     fn->setName("sub_peephole_test_func");
 
-    auto arg0 = fn->nthArg(0);
+    auto arg0 = fn->nthArgAs<ir::IntValue>(0);
 
     auto *bb1 = builder.newBb("bb1");
 
-    auto *const_42 = builder.makeIntConst(i32, 42);
-    auto *const_10 = builder.makeIntConst(i32, 10);
-    auto *const_0 = builder.makeIntConst(i32, 0);
+    auto *const_42 = builder.makeIntConst(*i32, 42);
+    auto *const_10 = builder.makeIntConst(*i32, 10);
+    auto *const_0 = builder.makeIntConst(*i32, 0);
 
     auto *v0 = builder.makeSub(arg0, const_0);
     auto *v1 = builder.makeSub(const_42, const_10);
@@ -63,16 +65,18 @@ TEST(JA_PEEPHOLE, Shl) {
     ir::Builder builder{};
     builder.setMod(&mod);
 
+    const auto *i32 = builder.makeIntType(32);
+
     auto *fn = builder.newFunc(i32, {i32});
     fn->setName("shl_peephole_test_func");
 
-    auto arg0 = fn->nthArg(0);
+    auto arg0 = fn->nthArgAs<ir::IntValue>(0);
 
     auto *bb1 = builder.newBb("bb1");
 
-    auto *const_42 = builder.makeIntConst(i32, 42);
-    auto *const_10 = builder.makeIntConst(i32, 10);
-    auto *const_0 = builder.makeIntConst(i32, 0);
+    auto *const_42 = builder.makeIntConst(*i32, 42);
+    auto *const_10 = builder.makeIntConst(*i32, 10);
+    auto *const_0 = builder.makeIntConst(*i32, 0);
 
     auto *v0 = builder.makeShl(arg0, const_0);
     auto *v1 = builder.makeShl(const_0, arg0);
@@ -123,16 +127,18 @@ TEST(JA_PEEPHOLE, Or) {
     ir::Builder builder{};
     builder.setMod(&mod);
 
+    const auto *i32 = builder.makeIntType(32);
+
     auto *fn = builder.newFunc(i32, {i32});
     fn->setName("or_peephole_test_func");
 
-    auto arg0 = fn->nthArg(0);
+    auto arg0 = fn->nthArgAs<ir::IntValue>(0);
 
     auto *bb1 = builder.newBb("bb1");
 
-    auto *const_42 = builder.makeIntConst(i32, 42);
-    auto *const_10 = builder.makeIntConst(i32, 10);
-    auto *const_0 = builder.makeIntConst(i32, 0);
+    auto *const_42 = builder.makeIntConst(*i32, 42);
+    auto *const_10 = builder.makeIntConst(*i32, 10);
+    auto *const_0 = builder.makeIntConst(*i32, 0);
 
     auto *v0 = builder.makeOr(arg0, const_0);
     auto *v1 = builder.makeOr(const_0, arg0);

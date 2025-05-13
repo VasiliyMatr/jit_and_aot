@@ -1,6 +1,7 @@
 #ifndef VALUES_HPP
 #define VALUES_HPP
 
+#include <memory>
 #include <variant>
 
 #include <jit_aot/ir/types.hpp>
@@ -62,8 +63,14 @@ class IntConstant final : public IntValue {
     }
 };
 
-struct IntFuncArg final : public IntValue {
-    IntFuncArg(IntType type, ValueId id) : IntValue(type, id, nullptr) {}
+class Pointer : public Value {
+    const PointerType *m_type = nullptr;
+
+  public:
+    Pointer(const PointerType *type, ValueId id, instr::Instr *producer)
+        : Value(id, producer), m_type(type) {}
+
+    JA_NODISCARD const PointerType &type() const override { return *m_type; }
 };
 
 } // namespace jit_aot::ir

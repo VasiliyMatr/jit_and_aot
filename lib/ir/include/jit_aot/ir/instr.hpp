@@ -34,6 +34,9 @@ enum class InstrType {
 
     kReturn,
 
+    kNullCheck,
+    kBoundCheck,
+
     kInvalid,
 };
 
@@ -70,6 +73,16 @@ inline constexpr bool isBranch(InstrType instr_type) {
     }
 }
 
+inline constexpr bool isCheck(InstrType instr_type) {
+    switch (instr_type) {
+    case InstrType::kNullCheck:
+    case InstrType::kBoundCheck:
+        return true;
+    default:
+        return false;
+    }
+}
+
 // Base class for all instructions
 class Instr {
   protected:
@@ -92,6 +105,10 @@ class Instr {
     JA_NODISCARD auto opEnd() noexcept { return m_ops.end(); }
     JA_NODISCARD auto opBegin() const noexcept { return m_ops.begin(); }
     JA_NODISCARD auto opEnd() const noexcept { return m_ops.end(); }
+
+    JA_NODISCARD auto getNthOpId(size_t n) const noexcept {
+        return m_ops[n]->id();
+    }
 
     // Get instr result ptr (== nullptr if instr don't have result)
     JA_NODISCARD virtual const Value *result() const noexcept {
@@ -224,6 +241,16 @@ struct BrDirectCond final : public Instr {
 
 struct Return final : public Instr {
     Return(const IntValue *ret_val) : Instr(InstrType::kReturn, {ret_val}) {}
+};
+
+struct NullCheck final : public Instr {
+    explicit NullCheck(const Pointer *pointer)
+        : Instr(InstrType::kNullCheck, {pointer}) {}
+};
+
+struct BoundCheck final : public Instr {
+    BoundCheck(const IntValue *index, const IntValue *bound)
+        : Instr(InstrType::kBoundCheck, {index, bound}) {}
 };
 
 } // namespace instr
